@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import { errorHandler } from './middleware/errorHandler.js';
+import { apiRoutes } from './routes/index.js';
 
 export function createApp() {
   const app = express();
@@ -13,6 +14,8 @@ export function createApp() {
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
   });
+
+  app.use('/api', apiRoutes);
 
   app.use(errorHandler);
 
