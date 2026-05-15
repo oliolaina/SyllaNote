@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  EDITOR
+  COMMENTATOR
+  READER
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String?
+  passwordHash String        @map("password_hash")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  notes        Note[]
+  accessRights AccessRight[]
+  comments     Comment[]
+
+  @@map("users")
+}
+
+model Note {
+  id          String        @id @default(uuid())
+  title       String
+  contentJson Json          @default("{}") @map("content_json")
+  ownerId     String        @map("owner_id")
+  owner       User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  blocks      Block[]
+  comments    Comment[]
+  accessRights AccessRight[]
+
+  @@map("notes")
+}
+
+model Block {
+  id       String    @id @default(uuid())
+  noteId   String    @map("note_id")
+  note     Note      @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  type     String
+  content  Json?
+  order    Int
+  comments Comment[]
+
+  @@map("blocks")
+}
+
+model AccessRight {
+  id     String @id @default(uuid())
+  userId String @map("user_id")
+  noteId String @map("note_id")
+  role   Role
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, noteId])
+  @@map("access_rights")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  text      String
+  userId    String   @map("user_id")
+  noteId    String   @map("note_id")
+  blockId   String?  @map("block_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  block     Block?   @relation(fields: [blockId], references: [id], onDelete: SetNull)
+
+  @@map("comments")
+}
