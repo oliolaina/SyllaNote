@@ -1,0 +1,54 @@
+.wrapper {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor {
+  flex: 1;
+  padding: 1rem 1.25rem;
+  outline: none;
+  min-height: 360px;
+}
+
+.editor :global(.editor-paragraph) {
+  margin: 0 0 0.75rem;
+}
+
+.editor :global(.editor-text-bold) {
+  font-weight: 600;
+}
+
+.editor :global(.editor-text-italic) {
+  font-style: italic;
+}
+
+.editor :global(.editor-link) {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.editor :global(.editor-list-ul),
+.editor :global(.editor-list-ol) {
+  margin: 0 0 0.75rem 1.25rem;
+}
+
+.readOnly {
+  background: var(--color-bg);
+}
+
+.placeholder {
+  color: var(--color-text-muted);
+  pointer-events: none;
+  position: absolute;
+  top: 1rem;
+  left: 1.25rem;
+}
+
+.editorContainer {
+  position: relative;
+  flex: 1;
+}

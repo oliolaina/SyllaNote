@@ -1,0 +1,33 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.toolBtn {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.toolBtn:hover:not(:disabled) {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.toolBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.active {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
