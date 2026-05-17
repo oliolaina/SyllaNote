@@ -1,7 +1,7 @@
 import type { Role } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
-import type { AccessAction, ApiRole } from '../types/express.js';
-import { roleToApi } from '../types/express.js';
+import type { AccessAction, ApiRole } from '../types/roles.js';
+import { roleToApi } from '../types/roles.js';
 import { AppError } from '../types/errors.js';
 
 const rolePermissions: Record<Role, Set<AccessAction>> = {

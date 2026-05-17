@@ -1,7 +1,7 @@
 import { Role } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
-import type { ApiRole } from '../types/express.js';
-import { apiToRole, roleToApi } from '../types/express.js';
+import type { ApiRole } from '../types/roles.js';
+import { apiToRole, roleToApi } from '../types/roles.js';
 import { AppError } from '../types/errors.js';
 import { accessService } from './access.service.js';
 

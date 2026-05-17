@@ -1,4 +1,6 @@
+import { HocuspocusProvider } from '@hocuspocus/provider';
 import { AutoLinkPlugin } from '@lexical/react/LexicalAutoLinkPlugin';
+import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
@@ -6,17 +8,16 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 import { ListItemNode, ListNode } from '@lexical/list';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { HeadingNode } from '@lexical/rich-text';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useEffect, useMemo } from 'react';
 import type { Provider } from '@lexical/yjs';
-import { WebsocketProvider } from 'y-websocket';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as Y from 'yjs';
 import type { ApiRole } from '../../types/api';
-import { canEdit, canUseCollaboration } from '../../utils/permissions';
+import { countAwarenessUsers } from '../../utils/collaboration';
+import { canEdit, canViewCollaboration } from '../../utils/permissions';
 import { EditorToolbar } from './EditorToolbar';
 import { editorTheme } from './editorTheme';
 import styles from './NoteEditor.module.css';
@@ -61,8 +62,21 @@ export function NoteEditor({
   onOnlineChange,
 }: NoteEditorProps) {
   const editable = canEdit(myRole);
-  const useCollab = canUseCollaboration(myRole) && !!token;
+  const useCollab = canViewCollaboration(myRole) && !!token;
   const hasYjsState = Boolean(contentJson?.yjsState);
+  const hasLexicalRoot = Boolean(contentJson?.root);
+  const [isSynced, setIsSynced] = useState(!useCollab);
+
+  useEffect(() => {
+    setIsSynced(!useCollab);
+  }, [noteId, useCollab]);
+
+  const collabInitialState = useMemo(() => {
+    if (editable && !hasYjsState && hasLexicalRoot) {
+      return JSON.stringify(contentJson);
+    }
+    return undefined;
+  }, [contentJson, editable, hasLexicalRoot, hasYjsState]);
 
   const initialConfig = useMemo(
     () => ({
@@ -75,26 +89,45 @@ export function NoteEditor({
     [editable],
   );
 
-  const providerFactory = useMemo(() => {
-    if (!useCollab || !token) return undefined;
-    return (id: string, yjsDocMap: Map<string, Y.Doc>) => {
+  const providerFactory = useCallback(
+    (id: string, yjsDocMap: Map<string, Y.Doc>) => {
       let doc = yjsDocMap.get(id);
       if (!doc) {
         doc = new Y.Doc();
         yjsDocMap.set(id, doc);
       }
-      const provider = new WebsocketProvider(WS_URL, id, doc, {
+
+      const provider = new HocuspocusProvider({
+        url: WS_URL,
+        name: id,
+        document: doc,
+        token,
         connect: true,
-        params: { token },
+        onSynced: ({ state }) => {
+          if (state) setIsSynced(true);
+        },
+        onAwarenessUpdate: ({ states }) => {
+          onOnlineChange?.(countAwarenessUsers(states));
+        },
       });
-      if (onOnlineChange) {
-        const update = () => onOnlineChange(provider.awareness.getStates().size || 1);
-        provider.awareness.on('change', update);
-        update();
-      }
+
       return provider as unknown as Provider;
-    };
-  }, [useCollab, token, onOnlineChange]);
+    },
+    [token, onOnlineChange],
+  );
+
+  const placeholder = useMemo(() => {
+    if (!useCollab) {
+      return <div className={styles.placeholder}>Начните писать конспект…</div>;
+    }
+    if (!isSynced) {
+      return <div className={styles.placeholder}>Загрузка конспекта…</div>;
+    }
+    if (editable) {
+      return <div className={styles.placeholder}>Начните писать конспект…</div>;
+    }
+    return null;
+  }, [useCollab, isSynced, editable]);
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
@@ -103,9 +136,7 @@ export function NoteEditor({
         <div className={styles.editorContainer}>
           <RichTextPlugin
             contentEditable={<ContentEditable className={styles.editor} />}
-            placeholder={
-              <div className={styles.placeholder}>Начните писать конспект…</div>
-            }
+            placeholder={placeholder}
             ErrorBoundary={LexicalErrorBoundary}
           />
           {!useCollab && <InitialContentPlugin contentJson={contentJson} />}
@@ -113,11 +144,12 @@ export function NoteEditor({
             <CollaborationPlugin
               id={noteId}
               providerFactory={providerFactory}
-              shouldBootstrap={!hasYjsState}
+              shouldBootstrap={!hasYjsState && editable}
               username={userName}
+              initialEditorState={collabInitialState}
             />
           )}
-          <HistoryPlugin />
+          {!useCollab && <HistoryPlugin />}
           <ListPlugin />
           <LinkPlugin />
           <AutoLinkPlugin

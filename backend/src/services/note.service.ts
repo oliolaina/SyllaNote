@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import { accessService } from './access.service.js';
 import { noteRepository } from '../repositories/note.repository.js';
-import { roleToApi } from '../types/express.js';
+import { roleToApi } from '../types/roles.js';
 import { AppError } from '../types/errors.js';
 
 function mapNoteListItem(

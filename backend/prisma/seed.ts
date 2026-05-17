@@ -41,9 +41,10 @@ async function main() {
     },
   });
 
+  // Конспект 1: все три пользователя в «личном кабинете», разные роли на одном документе
   const note1 = await prisma.note.create({
     data: {
-      title: 'Лекция по архитектуре ПО',
+      title: 'Лекция по архитектуре ПО (групповой доступ)',
       contentJson: {
         root: {
           children: [
@@ -77,15 +78,17 @@ async function main() {
     data: { userId: reader.id, noteId: note1.id, role: Role.READER },
   });
 
+  // Конспект 2: снова все трое; у editor роль commentator (на note1 он editor — разные роли по конспектам)
   const note2 = await prisma.note.create({
     data: {
-      title: 'Совместный конспект группы',
+      title: 'Совместный конспект группы (групповой доступ)',
       contentJson: {},
       ownerId: owner.id,
       accessRights: {
         create: [
           { userId: owner.id, role: Role.OWNER },
           { userId: editor.id, role: Role.COMMENTATOR },
+          { userId: reader.id, role: Role.READER },
         ],
       },
       blocks: {
@@ -109,7 +112,16 @@ async function main() {
 
   console.log('Seed completed:', {
     users: [owner.email, editor.email, reader.email],
-    notes: [note1.title, note2.title],
+    notes: [
+      {
+        title: note1.title,
+        roles: { owner: 'owner', editor: 'editor', reader: 'reader' },
+      },
+      {
+        title: note2.title,
+        roles: { owner: 'owner', editor: 'commentator', reader: 'reader' },
+      },
+    ],
   });
 }
 

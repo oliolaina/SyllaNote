@@ -1,5 +1,6 @@
 import { Server } from '@hocuspocus/server';
 import type { onAuthenticatePayload, onLoadDocumentPayload, onStoreDocumentPayload } from '@hocuspocus/server';
+import { Role } from '@prisma/client';
 import * as Y from 'yjs';
 import { env } from './config/env.js';
 import { noteRepository } from './repositories/note.repository.js';
@@ -15,8 +16,10 @@ type StoredContent = {
 export function startWebSocketServer(): void {
   const server = Server.configure({
     port: env.WS_PORT,
+    debounce: 3000,
+    maxDebounce: 10000,
 
-    async onAuthenticate({ token, documentName }: onAuthenticatePayload) {
+    async onAuthenticate({ token, documentName, connection }: onAuthenticatePayload) {
       if (!token) {
         throw new Error('Authentication token required');
       }
@@ -32,18 +35,18 @@ export function startWebSocketServer(): void {
         throw new Error('Document name (note id) required');
       }
 
+      let role: Role;
       try {
-        await accessService.requireAction(
-          payload.userId,
-          documentName,
-          'websocket_edit',
-        );
+        role = await accessService.requireAction(payload.userId, documentName, 'read');
       } catch (err) {
         if (err instanceof AppError) {
           throw new Error(err.message);
         }
         throw err;
       }
+
+      // Пустой локальный Y.Doc у читателя не должен перезаписывать документ на сервере
+      connection.readOnly = role === Role.COMMENTATOR || role === Role.READER;
 
       return { user: { id: payload.userId, email: payload.email } };
     },
@@ -54,8 +57,12 @@ export function startWebSocketServer(): void {
 
       const content = note.contentJson as StoredContent;
       if (content?.yjsState) {
-        const update = Buffer.from(content.yjsState, 'base64');
-        Y.applyUpdate(document, update);
+        try {
+          const update = Buffer.from(content.yjsState, 'base64');
+          Y.applyUpdate(document, update);
+        } catch {
+          // Игнорируем битое состояние (например, после несовместимого y-websocket)
+        }
       }
     },
 
