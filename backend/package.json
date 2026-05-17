@@ -11,7 +11,8 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "node --experimental-strip-types prisma/seed.ts",
     "db:studio": "prisma studio",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "fuzz": "tsx fuzzing/run.ts"
   },
   "prisma": {
     "seed": "node --experimental-strip-types prisma/seed.ts"

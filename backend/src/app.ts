@@ -15,6 +15,13 @@ export function createApp() {
     }),
   );
   app.use(express.json({ limit: '2mb' }));
+  app.use((err: unknown, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (err instanceof SyntaxError && 'body' in err) {
+      res.status(400).json({ error: 'Invalid JSON body' });
+      return;
+    }
+    next(err);
+  });
 
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });

@@ -1,13 +1,14 @@
 import { z } from 'zod';
+import { safeString } from './safeString.js';
 
 export const createNoteSchema = z.object({
-  title: z.string().min(1).max(200),
+  title: safeString(1, 200),
   contentJson: z.record(z.unknown()).optional(),
 });
 
 export const updateNoteSchema = z
   .object({
-    title: z.string().min(1).max(200).optional(),
+    title: safeString(1, 200).optional(),
     contentJson: z.record(z.unknown()).optional(),
   })
   .refine((data) => data.title !== undefined || data.contentJson !== undefined, {

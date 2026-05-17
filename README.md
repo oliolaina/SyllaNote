@@ -72,8 +72,6 @@ docker compose up --build
 docker compose exec backend npm run db:seed
 ```
 
-Если при сборке `npm ci` падает с `ECONNRESET` — это обрыв сети при скачивании пакетов. Повторите `docker compose build` (в Dockerfile есть повторные попытки). При нестабильном интернете сначала выполните `npm ci` локально в `backend/` и `frontend/`, затем собирайте снова.
-
 - Frontend: [http://localhost:5173](http://localhost:5173)  
 - Backend API: [http://localhost:3000](http://localhost:3000)
 
@@ -82,21 +80,27 @@ docker compose exec backend npm run db:seed
 После `npm run db:seed` в каталоге `backend`:
 
 
-| Email | Пароль |
-|-------|--------|
-| owner@syllanote.test | password123 |
-| editor@syllanote.test | password123 |
-| reader@syllanote.test | password123 |
+| Email                                                 | Пароль      |
+| ----------------------------------------------------- | ----------- |
+| [owner@syllanote.test](mailto:owner@syllanote.test)   | password123 |
+| [editor@syllanote.test](mailto:editor@syllanote.test) | password123 |
+| [reader@syllanote.test](mailto:reader@syllanote.test) | password123 |
+
 
 Роль задаётся **отдельно для каждого конспекта**. В seed оба конспекта с пометкой «групповой доступ» видны всем троим в списке «Мои конспекты»:
 
-| Конспект | owner | editor | reader |
-|----------|-------|--------|--------|
-| Лекция по архитектуре ПО (групповой доступ) | владелец | редактор | читатель |
+
+| Конспект                                      | owner    | editor      | reader   |
+| --------------------------------------------- | -------- | ----------- | -------- |
+| Лекция по архитектуре ПО (групповой доступ)   | владелец | редактор    | читатель |
 | Совместный конспект группы (групповой доступ) | владелец | комментатор | читатель |
+
 
 У `editor` на первом конспекте роль «редактор», на втором — «комментатор».
 
+## Фаззинг-тестирование
+
+Автоматический прогон  — см. [backend/README.md](backend/README.md#фаззинг-тестирование-api). После `npm run fuzz` отчёт: `backend/fuzzing/results/latest.md`.
 
 ## Основные возможности
 
