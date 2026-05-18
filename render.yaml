@@ -57,11 +57,10 @@ services:
       - key: NODE_ENV
         value: production
 
-  # Статический фронтенд (Vite)
+  # Статический фронтенд (Vite). У static site нет поля plan в Blueprint — тариф задаётся в Dashboard.
   - type: web
     name: syllanote-frontend
     runtime: static
-    plan: free
     rootDir: frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
