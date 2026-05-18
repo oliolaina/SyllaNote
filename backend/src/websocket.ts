@@ -13,9 +13,9 @@ type StoredContent = {
   [key: string]: unknown;
 };
 
-export function startWebSocketServer(): void {
+export function startWebSocketServer(port = env.WS_PORT): void {
   const server = Server.configure({
-    port: env.WS_PORT,
+    port,
     debounce: 3000,
     maxDebounce: 10000,
 
@@ -82,5 +82,5 @@ export function startWebSocketServer(): void {
   });
 
   server.listen();
-  console.log(`WebSocket server listening on ws://localhost:${env.WS_PORT}`);
+  console.log(`WebSocket server listening on port ${port}`);
 }

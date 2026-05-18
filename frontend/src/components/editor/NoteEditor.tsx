@@ -22,7 +22,14 @@ import { EditorToolbar } from './EditorToolbar';
 import { editorTheme } from './editorTheme';
 import styles from './NoteEditor.module.css';
 
-const WS_URL = import.meta.env.VITE_WS_URL ?? 'ws://localhost:8080';
+function resolveWsUrl(raw: string | undefined): string {
+  const value = raw ?? 'ws://localhost:8080';
+  if (value.startsWith('https://')) return `wss://${value.slice(8)}`;
+  if (value.startsWith('http://')) return `ws://${value.slice(7)}`;
+  return value;
+}
+
+const WS_URL = resolveWsUrl(import.meta.env.VITE_WS_URL);
 
 const URL_MATCHER =
   /((https?:\/\/(www\.)?)|(www\.))[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;

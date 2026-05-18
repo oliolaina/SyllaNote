@@ -40,4 +40,4 @@ COPY prisma ./prisma/
 
 EXPOSE 3000 8080
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
+CMD ["sh", "-c", "if [ \"$SERVICE_MODE\" = 'ws' ]; then node dist/index.js; else npx prisma migrate deploy && node dist/index.js; fi"]

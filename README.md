@@ -63,6 +63,12 @@ npm run dev
 
 Приложение: [http://localhost:5173](http://localhost:5173) (запросы `/api` проксируются на backend через Vite).
 
+## Развёртывание на Render.com
+
+В корне репозитория — `[render.yaml](render.yaml)` (Blueprint). Пошаговая инструкция: [docs/deploy-render.md](docs/deploy-render.md).
+
+Кратко: подключить репозиторий как **Blueprint** → дождаться деплоя → в Shell сервиса API выполнить seed → открыть URL фронтенда.
+
 ## Запуск через Docker
 
 Из корня проекта:
@@ -100,7 +106,7 @@ docker compose exec backend npm run db:seed
 
 ## Фаззинг-тестирование
 
-Автоматический прогон  — см. [backend/README.md](backend/README.md#фаззинг-тестирование-api). После `npm run fuzz` отчёт: `backend/fuzzing/results/latest.md`.
+После `npm run fuzz` отчёт: `backend/fuzzing/results/latest.md`.
 
 ## Основные возможности
 

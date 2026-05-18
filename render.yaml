@@ -1,0 +1,79 @@
+# Render Blueprint — SyllaNote
+# Документация: https://render.com/docs/blueprint-spec
+# Инструкция по развёртыванию: docs/deploy-render.md
+
+databases:
+  - name: syllanote-db
+    databaseName: syllanote
+    user: syllanote
+    plan: free
+
+services:
+  # REST API (Prisma migrate при старте)
+  - type: web
+    name: syllanote-api
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: SERVICE_MODE
+        value: api
+      - key: DATABASE_URL
+        fromDatabase:
+          name: syllanote-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: BCRYPT_ROUNDS
+        value: "10"
+      - key: NODE_ENV
+        value: production
+
+  # WebSocket (Hocuspocus + Yjs), отдельный инстанс — на Render один порт на сервис
+  - type: web
+    name: syllanote-ws
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SERVICE_MODE
+        value: ws
+      - key: DATABASE_URL
+        fromDatabase:
+          name: syllanote-db
+          property: connectionString
+      - key: JWT_SECRET
+        fromService:
+          type: web
+          name: syllanote-api
+          envVarKey: JWT_SECRET
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: NODE_ENV
+        value: production
+
+  # Статический фронтенд (Vite)
+  - type: web
+    name: syllanote-frontend
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: true
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: syllanote-api
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: VITE_WS_URL
+        fromService:
+          type: web
+          name: syllanote-ws
+          envVarKey: RENDER_EXTERNAL_URL

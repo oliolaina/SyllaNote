@@ -2,10 +2,16 @@ import { createApp } from './app.js';
 import { env } from './config/env.js';
 import { startWebSocketServer } from './websocket.js';
 
-const app = createApp();
+const { SERVICE_MODE: mode } = env;
 
-app.listen(env.PORT, () => {
-  console.log(`REST API listening on http://localhost:${env.PORT}`);
-});
+if (mode === 'api' || mode === 'all') {
+  const app = createApp();
+  app.listen(env.PORT, () => {
+    console.log(`REST API listening on port ${env.PORT} (mode=${mode})`);
+  });
+}
 
-startWebSocketServer();
+if (mode === 'ws' || mode === 'all') {
+  const wsPort = mode === 'ws' ? env.PORT : env.WS_PORT;
+  startWebSocketServer(wsPort);
+}
