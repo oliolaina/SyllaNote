@@ -12,6 +12,8 @@ const envSchema = z.object({
   SERVICE_MODE: z.enum(['all', 'api', 'ws']).default('all'),
   /** Через запятую, например https://syllanote.onrender.com */
   CORS_ORIGINS: z.string().optional(),
+  /** Если задан — доступен POST /api/dev/seed (заголовок X-Seed-Secret). Только для syllanote-api. */
+  SEED_SECRET: z.string().min(16).optional(),
 });
 
 export const env = envSchema.parse(process.env);
