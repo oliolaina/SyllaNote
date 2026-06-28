@@ -195,7 +195,7 @@ export function writeMarkdownReport(summary: FuzzSummary, results: FuzzResultRow
     '',
     '- `POST /api/auth/register`',
     '- `POST /api/notes`',
-    '- `PUT /api/notes/:id`',
+    '- `PATCH /api/notes/:id`',
     '- `DELETE /api/notes/:id`, `POST /api/access/invite` (RBAC)',
     '',
     'Полный лог: `latest.json` в этой же папке.',

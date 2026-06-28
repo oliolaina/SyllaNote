@@ -251,9 +251,9 @@ function buildUpdateNoteCases(validNoteId: string): FuzzCase[] {
   for (const id of invalidNoteIds) {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
     cases.push({
-      id: `put-id-${++n}`,
+      id: `patch-id-${++n}`,
       category: 'injection',
-      method: 'PUT',
+      method: 'PATCH',
       path: `/api/notes/${encodeURIComponent(id)}`,
       description: `update note: некорректный id = ${id}`,
       body: { title: 'Fuzz' },
@@ -263,9 +263,9 @@ function buildUpdateNoteCases(validNoteId: string): FuzzCase[] {
 
   for (const payload of [...xssPayloads, ...sqlInjectionPayloads]) {
     cases.push({
-      id: `put-title-inj-${++n}`,
+      id: `patch-title-inj-${++n}`,
       category: 'injection',
-      method: 'PUT',
+      method: 'PATCH',
       path: `/api/notes/${validNoteId}`,
       description: 'update note: injection в title',
       body: { title: payload },
@@ -274,9 +274,9 @@ function buildUpdateNoteCases(validNoteId: string): FuzzCase[] {
   }
 
   cases.push({
-    id: 'put-empty-body',
+    id: 'patch-empty-body',
     category: 'validation',
-    method: 'PUT',
+    method: 'PATCH',
     path: `/api/notes/${validNoteId}`,
     description: 'update note: пустое тело (нет полей)',
     body: {},
@@ -284,9 +284,9 @@ function buildUpdateNoteCases(validNoteId: string): FuzzCase[] {
   });
 
   cases.push({
-    id: 'put-huge-title',
+    id: 'patch-huge-title',
     category: 'validation',
-    method: 'PUT',
+    method: 'PATCH',
     path: `/api/notes/${validNoteId}`,
     description: 'update note: заголовок > 200 символов',
     body: { title: longStrings.title10k },
@@ -307,11 +307,11 @@ function buildMalformedCases(validNoteId: string): FuzzCase[] {
     expectedStatus: 400,
   })).concat([
     {
-      id: 'malformed-put-json',
+      id: 'malformed-patch-json',
       category: 'malformed',
-      method: 'PUT',
+      method: 'PATCH',
       path: `/api/notes/${validNoteId}`,
-      description: 'malformed JSON на PUT /notes',
+      description: 'malformed JSON на PATCH /notes',
       rawBody: '{ "title": "broken", ',
       expectedStatus: 400,
     },
@@ -535,9 +535,9 @@ async function main(): Promise<void> {
     {
       id: 'update-no-token',
       category: 'validation',
-      method: 'PUT',
+      method: 'PATCH',
       path: `/api/notes/${validNoteId}`,
-      description: 'PUT /notes без JWT',
+      description: 'PATCH /notes без JWT',
       body: { title: 'Hack' },
       expectedStatus: 401,
     },

@@ -28,7 +28,7 @@ npm run fuzz
 ## Что проверяется
 
 - `POST /api/auth/register`, `POST /api/auth/login`
-- `POST /api/notes`, `PUT /api/notes/:id`
+- `POST /api/notes`, `PATCH /api/notes/:id`
 - `POST /api/access/invite`, `POST /api/comments`
 - RBAC: читатель/комментатор/редактор vs запрещённые операции
 

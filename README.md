@@ -74,6 +74,8 @@ npm run dev
 Из корня проекта:
 
 ```bash
+cp .env.example .env
+# отредактируйте .env: задайте POSTGRES_PASSWORD и JWT_SECRET
 docker compose up --build
 docker compose exec backend npm run db:seed
 ```

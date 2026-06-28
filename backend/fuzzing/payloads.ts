@@ -80,7 +80,7 @@ export const rbacScenarios = [
   {
     id: 'reader-update-note',
     role: 'reader' as const,
-    method: 'PUT' as const,
+    method: 'PATCH' as const,
     path: (noteId: string) => `/api/notes/${noteId}`,
     body: { title: 'Попытка редактирования' },
     expectedStatus: 403,
